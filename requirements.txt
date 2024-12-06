@@ -1,0 +1,11 @@
+numpy
+pandas
+tabulate
+matplotlib
+seaborn
+scikit-learn
+beautifulsoup4
+scrapy
+selenium
+flask
+gradio
