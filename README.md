@@ -22,3 +22,33 @@ Change the working directory to the project root, change the path of the project
 ```
     pip install -r requirements.txt
 ```
+
+## Collaborators
+<table>
+    <tbody>
+        <tr>
+            <th align="center">Member name</th>
+            <th align="center">Student ID</th>
+        </tr>
+        <tr>
+            <td>Nguyễn Chí Long</td>
+            <td align="center"> 20210553&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Ngô Xuân Bách</td>
+            <td align="center"> 20215181&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Lê Xuân Hiếu</td>
+            <td align="center"> 20215201&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Đinh Việt Quang</td>
+            <td align="center"> 20215235&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr>
+            <td>Nguyễn Viết Thuận</td>
+            <td align="center"> 20210826&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+    </tbody>
+</table>
