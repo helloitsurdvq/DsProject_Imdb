@@ -9,3 +9,10 @@ scrapy
 selenium
 flask
 gradio
+tqdm
+more-intertools
+pillow
+senetence-transformers
+tensorflows
+keras
+tf-keras

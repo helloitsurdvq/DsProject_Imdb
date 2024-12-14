@@ -8,6 +8,7 @@
 ```
 checkpoint/                 # model deployment
 data/                       # raw data
+demo/                       # demo application
 docs/                       # project report and presentation
 notebooks/                  # main notebooks
 scraper/                    # scraper folder
@@ -16,12 +17,29 @@ README.md
 requirements.txt            # requirement libraries
 ```
 
-
 ## Setup
 Change the working directory to the project root, change the path of the project properly and then install required packages and libraries.
-```
+```bash
     pip install -r requirements.txt
 ```
+
+Application demo using command for both client and server side:
+
+```bash
+    # client
+    cd IMDbRecSys/demo/client
+    npm i
+    npm start
+```
+
+```bash
+    # server
+    cd IMDbRecSys/demo/server
+    python -m app
+```
+The website can be accessed at
+* Client: http://localhost:3000
+* Server: http://localhost:5000
 
 ## Collaborators
 <table>
