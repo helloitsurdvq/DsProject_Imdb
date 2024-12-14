@@ -1,13 +1,7 @@
-/* RecommendationPage.css */
-
 .recommendation-page {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; /* Align to the top */
-    padding: 20px;
-    background-color: #000; /* Black background color */
-    min-height: 100vh; /* Make sure the page takes at least the full viewport height */
+    padding: 2rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    min-height: 90vh;
 }
 
 .header {
@@ -20,34 +14,38 @@
 }
 
 .search-bar {
+    max-width: 800px;
+    margin: 2rem auto;
     display: flex;
-    align-items: center;
-    margin-bottom: 100px; /* Add some margin at the bottom */
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
 }
 
-input {
-    margin: 0;
-    padding: 10px;
-    width: 300px; /* Adjust the width as needed for a wider search bar */
-    border: 1px solid #ccc; /* Add a border for a cleaner look */
-    border-radius: 5px;
+.search-bar input {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid rgba(245, 197, 24, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-size: 1.1rem;
 }
 
-button {
-    cursor: pointer;
-    padding: 10px 20px;
-    background-color: #ffc107; /* Yellow color for the button */
-    color: #000; /* Text color */
+.search-bar button {
+    padding: 0 2rem;
+    background: #f5c518;
     border: none;
-    border-radius: 100px;
-    font-size: 16px;
-    margin-left: 10px;
-    margin-top: 10px;
-    transition: background-color 0.3s ease; /* Smooth transition on hover */
+    border-radius: 8px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-button:hover {
-    background-color: #ffca2a; /* Darker yellow color on hover */
+.search-bar button:hover {
+    background: #ffd700;
 }
 
 h2 {
@@ -68,39 +66,64 @@ li {
 }
 
 .movie-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px; /* Adjust the gap between movie containers */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem 0;
 }
 
 .movie-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 8px;
-    width: 250px; /* Adjust the width of each movie container as needed */
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
 }
+
+.movie-container:hover {
+    transform: translateY(-5px);
+}
+
 .movie-container img {
     width: 100%;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    height: 400px;
+    object-fit: cover;
 }
 
-
 .movie-details {
-    flex-grow: 1; /* Allow movie-details to take up remaining vertical space */
+    padding: 1.5rem;
+}
+
+.movie-details h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.movie-details p {
+    color: #bbb;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.suggestion-text {
+    text-align: center;
+    color: #f5c518;
+    margin: 1rem 0;
+    font-style: italic;
 }
 
 .movie__imdbButton {
-    margin-top: 8px; /* Add a certain distance from the top */
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    margin-top: auto; /* Push the IMDb button to the bottom of the container */
+    background: #f5c518;
+    color: #000;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    display: inline-block;
+    margin: 1rem;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.movie__imdbButton:hover {
+    background: #ffd700;
 }
 
 .newTab {
@@ -108,8 +131,20 @@ li {
     font-size: 0.8em;
 }
 
-.suggestion-text {
-    text-align: center;
-    margin: 0 auto;
-    padding: 20px;
+@media screen and (max-width: 1400px) {
+    .movie-list {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media screen and (max-width: 1024px) {
+    .movie-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 640px) {
+    .movie-list {
+        grid-template-columns: 1fr;
+    }
 }

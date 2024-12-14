@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import "./ContentRecommendationPage.css";
 
 const ContentRecommendationPage = () => {
@@ -14,7 +15,7 @@ const ContentRecommendationPage = () => {
       setLoading(true);
       let query = movieTitle.toLowerCase();
       const response = await axios.post(
-        "http://localhost:5000/api/content-base-recommend",
+        "http://localhost:5000/api/content-based-recommend",
         { movie_title: query }
       );
       const movieTitles = response.data.recommendations;
@@ -36,11 +37,11 @@ const ContentRecommendationPage = () => {
 
         const movieDetails = tmdbResponse.data.results[0];
         return {
+          id: movieDetails.id,
           original_title: movieDetails.original_title,
           releaseDate: movieDetails.release_date,
           overview: movieDetails.overview,
           posterPath: movieDetails.poster_path,
-          id: movieDetails.id,
         };
       });
 
@@ -61,7 +62,7 @@ const ContentRecommendationPage = () => {
           type="text"
           value={movieTitle}
           onChange={(e) => setMovieTitle(e.target.value)}
-          placeholder="Enter one of your favorite movies"
+          placeholder="Enter your favorite movie title"
         />
         <button onClick={handleRecommendation} disabled={loading}>
           {loading ? "Loading..." : "Get Recommendations"}
@@ -70,30 +71,36 @@ const ContentRecommendationPage = () => {
 
       <div>
         {error && <p className="error-message">{error}</p>}
-
-        <h2 className="suggestion-text">{suggestion}</h2>
+        {suggestion && <h2 className="suggestion-text">Do you mean: {suggestion}</h2>}
         <h2>Recommended Movies:</h2>
         <div className="movie-list">
           {recommendations
             .filter((movie) => movie !== null)
             .map((movie, index) => (
               <div key={index} className="movie-container">
-                <div></div>
-                <img
-                  src={`https://image.tmdb.org/t/p/original${
-                    movie ? movie.posterPath : ""
-                  }`}
-                  alt={movie ? movie.original_title : ""}
-                />
-                <div className="movie-details">
-                  <h3>{movie ? movie.original_title : ""}</h3>
-                  <p>Release Date: {movie ? movie.releaseDate : ""}</p>
-                  <p>{movie ? movie.overview.slice(0, 118) + "..." : ""}</p>
-                  <br></br>
-                </div>
-                <div>
+                <Link 
+                  to={`/movie/${movie.id}`} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <div className="movie-poster">
+                    <img
+                      src={`https://image.tmdb.org/t/p/original${
+                        movie ? movie.posterPath : ""
+                      }`}
+                      alt={movie ? movie.original_title : ""}
+                    />
+                    <div className="movie-details">
+                      <h3>{movie ? movie.original_title : ""}</h3>
+                      <p>Release Date: {movie ? movie.releaseDate : ""}</p>
+                      <p>{movie ? movie.overview.slice(0, 118) + "..." : ""}</p>
+                    </div>
+                  </div>
+                </Link>
+                <div className="movie-actions">
                   <a
-				    rel="noreferrer"
+                    rel="noreferrer"
                     href={`https://www.imdb.com/search/title/?title=${encodeURIComponent(
                       movie ? movie.original_title : ""
                     )}`}

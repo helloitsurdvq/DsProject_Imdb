@@ -132,3 +132,6 @@ dmypy.json
 .DS_Store
 
 */*/node_modules
+checkpoints/*.pkl
+checkpoints/*.npy
+notebooks/*.npy

@@ -1,34 +1,32 @@
 from flask import Flask, request, jsonify
-# from content_based_recommender import contents_based_recommender
-from collaborative_filtering_recommender import item_based_recommender
-from flask_cors import CORS  # Import CORS from flask_cors
+from flask_cors import CORS 
+from content_based_recommender import *
+from collaborative_filtering_recommender import *
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app) 
 
+@app.route("/api/content-based-recommend", methods=["POST"])
+def content_based_recommend_movies():
+    try:
+        data = request.get_json()
+        movie_title = data.get("movie_title")
 
-# @app.route("/api/content-base-recommend", methods=["POST"])
-# def content_based_recommend_movies():
-#     try:
-#         data = request.get_json()
-#         movie_title = data.get("movie_title")
+        # Get recommended movies as a list of titles
+        recommended_movies, suggestion = contents_based_recommender(
+            movie_title, num_of_recomm=10
+        )
 
-#         # Get recommended movies as a list of titles
-#         recommended_movies, suggestion = contents_based_recommender(
-#             movie_title, num_of_recomm=10
-#         )
+        return jsonify(
+            {
+                "recommendations": recommended_movies,
+                "suggestion": suggestion,
+            }
+        )
 
-#         return jsonify(
-#             {
-#                 "recommendations": recommended_movies,
-#                 "suggestion": suggestion,
-#             }
-#         )
-
-#     except Exception as e:
-#         print(e)
-#         return jsonify({"error": str(e)})
-
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)})
 
 @app.route("/api/collaborative-filtering-recommend", methods=["POST"])
 def collaborative_filteringl_recommend_movies():

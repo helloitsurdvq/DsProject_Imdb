@@ -22,7 +22,7 @@ function App() {
             element={<RecommendationPage />}
           />
           <Route
-            path="/movies/content-base/recommendation"
+            path="/movies/content-based/recommendation"
             element={<ContentRecommendationPage />}
           />
           <Route

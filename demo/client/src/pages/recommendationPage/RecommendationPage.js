@@ -1,26 +1,31 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./RecommendationPage.css";
 
 const RecommendationPage = () => {
   const navigate = useNavigate();
 
-  const handleNewClick = () => {
-    // Redirect to the recommendation page
-    navigate("/movies/content-base/recommendation");
-  };
-
-  const handleAccountClick = () => {
-    // Redirect to the recommendation page
-    navigate("/movies/collaborative-filtering/recommendation");
-  };
-
   return (
-    <div className="login-page">
-      <h1>Welcome to Movie Recommendations</h1>
-      <div className="login-buttons">
-        <button onClick={handleNewClick}>New</button>
-        <button onClick={handleAccountClick}>Already have account</button>
+    <div className="recommendation-welcome">
+      <div className="welcome-content">
+        <h1>Discover Your Next Favorite Movie</h1>
+        <p>Choose how you'd like to get recommendations:</p>
+        
+        <div className="recommendation-options">
+          <div className="option-card" onClick={() => navigate("/movies/content-based/recommendation")}>
+            <i className="fas fa-film"></i>
+            <h3>Movie-Based Recommendations</h3>
+            <p>Get recommendations based on a movie you love</p>
+            <button className="option-button">Start Exploring</button>
+          </div>
+
+          <div className="option-card" onClick={() => navigate("/movies/collaborative-filtering/recommendation")}>
+            <i className="fas fa-users"></i>
+            <h3>Personalized Recommendations</h3>
+            <p>Get recommendations based on your viewing history</p>
+            <button className="option-button">View Recommendations</button>
+          </div>
+        </div>
       </div>
     </div>
   );

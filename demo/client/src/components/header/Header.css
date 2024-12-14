@@ -1,33 +1,48 @@
 .header {
-    margin: 0 2.5rem;
-    padding: .5rem 0;
-    align-items: center;
+    background-color: #121212;
+    padding: 0.5rem 2.5rem;
     display: flex;
-    justify-content:space-between;
+    align-items: center;
+    justify-content: flex-start;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .headerLeft, .headerRight {
     display: flex;
     align-items: center;
-}
-
-a > span{
-    margin: 0 30px;
-    font-size: 1.3rem;
-    cursor: pointer;
-    color: white;
-}
-
-a > span:hover {
-    color: red;
+    flex-wrap: wrap;
 }
 
 .header__icon {
-    width: 80px;
+    width: 64px;
+    margin-right: 2rem;
     cursor: pointer;
 }
 
-.user__avatar {
-    font-size: 2rem;
+a > span {
+    margin: 0 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 400;
+    cursor: pointer;
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    white-space: nowrap;
 }
 
+a > span:hover {
+    color: #f5c518; /* IMDb yellow color */
+}
+
+.user__avatar {
+    font-size: 1.8rem;
+    margin-left: 2rem;
+    color: #ffffff;
+}
+
+.active > span {
+    color: #f5c518;
+}

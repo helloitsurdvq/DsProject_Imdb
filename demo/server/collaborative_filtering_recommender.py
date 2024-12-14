@@ -2,115 +2,133 @@ import pandas as pd
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from scipy import sparse
+import pickle
+import math
 
-#Load dataset
-movies_df = pd.read_csv("../../data/cleaned/cleaned_movies_for_rating.csv", sep=',', index_col=False, dtype='unicode', usecols=['movie_id', 'title', 'img_url'])
-df = pd.read_csv("../../data/cleaned/cleaned_user_rating.csv", sep=',', index_col=False, dtype='unicode')
+rating_df = pd.read_csv('../../data/cleaned/cleaned_user_rating.csv')
+rating_df_copy = rating_df.copy()
+movies_df = pd.read_csv('../../data/cleaned/cleaned_movies_details.csv', usecols=['movie_id', 'title', 'genres', 'overview', 'director', 'stars', 'img_url'])
 
-#Functions to return dataset's features
-def get_movie_url(movie_id):
+# Only keep users with >= 5 ratings
+user_rating_counts = rating_df_copy['user_id'].value_counts()
+users_with_5_or_more_ratings = user_rating_counts[user_rating_counts >= 5].index
+rating_df_copy = rating_df_copy[rating_df_copy['user_id'].isin(users_with_5_or_more_ratings)]
+rating_df_copy = rating_df_copy.reset_index(drop=True)
+
+# ID to number
+rating_df_copy['user_id_number'] = rating_df_copy['user_id'].astype('category').cat.codes.values
+rating_df_copy['movie_id_number'] = rating_df_copy['movie_id'].astype('category').cat.codes.values
+
+all_data = rating_df_copy[['user_id_number', 'movie_id_number', 'rating']].values
+number_to_user_id = dict(enumerate(rating_df_copy['user_id'].astype('category').cat.categories))
+user_id_to_number = {v: k for k, v in number_to_user_id.items()}
+number_to_movie_id = dict(enumerate(rating_df_copy['movie_id'].astype('category').cat.categories))
+movie_id_to_number = {v: k for k, v in number_to_movie_id.items()}
+# We may store an array for user_id <=> user_id_number and other types
+def get_movieURL(movie_id):
     return movies_df[movies_df.movie_id == movie_id].img_url.values[0]
 
-def get_user_id(user_id_number):
-    return df[df.user_id_number == user_id_number].user_id.values[0]
+class RISMF(object):
+    global user_id_to_number, number_to_user_id, movie_id_to_number, number_to_movie_id
+    def __init__(self, train_data, test_data, n_factors=10, learning_rate=0.01, lambda_reg=0.1, n_epochs=10):
+        self.train_data = train_data
+        self.test_data = test_data
+        self.n_factors = n_factors
+        self.learning_rate = learning_rate
+        self.lambda_reg = lambda_reg
+        self.n_epochs = n_epochs
+        self.n_users = int(np.max(self.train_data[:, 0])) + 1
+        self.n_movies = int(np.max(self.train_data[:, 1])) + 1
+        
+        self.P = np.random.normal(scale=1.0 / self.n_factors, size=(self.n_users + 100, self.n_factors))
+        self.Q = np.random.normal(scale=1.0 / self.n_factors, size=(self.n_movies + 100, self.n_factors))
+    
+    def incremental_update(self, new_ratings):
+        # Convert new_ratings from IDs to numerical indices
+        processed_ratings = []
+        for user_id, movie_id, rating in new_ratings:
+            # Check and update user_id_to_number
+            if user_id not in user_id_to_number:
+                user_id_to_number[user_id] = self.n_users
+                number_to_user_id[self.n_users] = user_id
+                self.n_users += 1
 
-def get_movie_id(movie_id_number):
-    return df[df.movie_id_number == movie_id_number].movie_id.values[0]
+            # Check and update movie_id_to_number
+            if movie_id not in movie_id_to_number:
+                movie_id_to_number[movie_id] = self.n_movies
+                number_to_movie_id[self.n_movies] = movie_id
+                self.n_movies += 1
 
-#convert movie id string into numerical id
-df['user_id_number'] = df['user_id'].astype('category').cat.codes.values
-df['movie_id_number'] = df['movie_id'].astype('category').cat.codes.values
-Y_data = df[['user_id_number', 'movie_id_number', 'rating']].values
+            # Convert IDs to numbers and append to processed_ratings
+            u = user_id_to_number[user_id]
+            i = movie_id_to_number[movie_id]
+            processed_ratings.append([u, i, rating])
 
-#Colaborative filtering model creation
-class Colaborative_Filtering(object):
-    def __init__(self, Y_data):
-        self.Y_data = Y_data
-        self.Ybar_data = None
-        # number of users and items. Remember to add 1 since id starts from 0
-        self.n_users = int(np.max(self.Y_data[:, 0])) + 1
-        self.n_items = int(np.max(self.Y_data[:, 1])) + 1
-    def create_model(self,k):
-        self.model = NearestNeighbors(n_neighbors=k,algorithm='brute',metric='cosine')
-        self.model.fit(self.interaction_matrix)
-    def create_matrix(self):
-        # Create a pandas DataFrame
-        new_df = pd.DataFrame(self.Y_data, columns=['user_id', 'movie_id', 'rating'])
+        # Convert processed_ratings to a NumPy array
+        processed_ratings = np.array(processed_ratings)
+        # Update the train_data matrix with the new ratings
+        self.train_data = np.vstack((self.train_data, processed_ratings))
+        # Incremental learning using new ratings
+        for u, i, r in processed_ratings:
+            u, i, r = int(u), int(i), int(r)
+            pred = self.pred(u, i)
+            error = r - pred
+            # Update P and Q
+            self.P[u, :] += self.learning_rate * (error * self.Q[i, :] - self.lambda_reg * self.P[u, :])
+            self.Q[i, :] += self.learning_rate * (error * self.P[u, :] - self.lambda_reg * self.Q[i, :])
 
-        # Convert the 'rating' column to integers
-        new_df['rating'] = new_df['rating'].astype(int)
+    def pred(self, u, i):
+        return self.P[u, :].dot(self.Q[i, :].T)
+            
+    def recommend(self, u):        
+        """
+        Determine all unrated items should be recommended for user u
+        """
+        ids = np.where(self.train_data[:, 0] == u)[0]
+        items_rated_by_u = self.train_data[ids, 1].tolist()
+        recommended_items = {}
+        for i in range(self.n_movies):
+            if i not in items_rated_by_u:
+                recommended_items[i] = self.pred(u, i)
 
-        # Create a sparse matrix
-        self.interaction_matrix = sparse.coo_matrix((new_df['rating'], (new_df['movie_id'], new_df['user_id'])))
-        self.interaction_matrix= self.interaction_matrix.tocsr()
-    def get_rated_movies(self,user_id):
-        self.movies_rated = df[['user_id_number','movie_id_number','rating']]
-        self.movies_rated = df.loc[df['user_id_number'] == user_id, ['user_id_number', 'movie_id_number', 'rating']]
-        self.movies_rated = pd.DataFrame(self.movies_rated, columns=['user_id_number', 'movie_id_number', 'rating'])
-        self.movies_rated= self.movies_rated[['movie_id_number','rating']].reset_index(drop=True)
-        return self.movies_rated
-    def calculate_score(self,user_id):
-        similar_candidates_rating= pd.Series(dtype='float64')
-        similar_candidates_score= pd.Series(dtype='float64')
-        self.movies_list=self.interaction_matrix.getcol(user_id).toarray()
-        self.movies_rated= self.movies_list
-        self.movies_list = np.where(self.movies_list != 0)[0]
+        return sorted(recommended_items, key=recommended_items.get, reverse=True)
+    
+    def loss(self, data):
+        L = 0
+        for u, i, r in data:
+            u, i = int(u), int(i)
+            pred = self.pred(u, i)
+            L += (r - pred)**2
+        L /= data.shape[0]
+        return math.sqrt(L)
 
-        for movie in self.movies_list:
-            similar = self.model.kneighbors(
-                [self.interaction_matrix.getrow(movie).toarray().squeeze()],
-                return_distance=True
-            )
-            sim_score=similar[0]
-            sim_id=similar[1]
-            sim_id=np.array(list(map(lambda x: x,sim_id[0])))
-            similar=pd.Series(data=sim_score[0],index=sim_id)
-            similar=similar[similar!=0]
-            # similar=similar[similar.index.isin(stats.index)]
-            similar_candidates_score=pd.concat([similar_candidates_score,similar])
-            similar=similar.map(lambda x: x*self.movies_rated[movie])
-            similar_candidates_rating = pd.concat([similar_candidates_rating,similar])
-        filtered_candidates_rating_sum= similar_candidates_rating.groupby(similar_candidates_rating.index).sum()
-        filtered_candidates_score_sum= similar_candidates_score.groupby(similar_candidates_score.index).sum()
-        similar_movies=filtered_candidates_rating_sum.index
-        pred_rating= pd.Series(dtype='float64',index=similar_movies)
-        for i in range(0,len(similar_movies)):
-            pred_rating[similar_movies[i]]= filtered_candidates_rating_sum[similar_movies[i]]/filtered_candidates_score_sum[similar_movies[i]]
-        return pred_rating
+def load_model(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
 
-#Item-Based Colaborative Filtering
-def item_based_recommender(uid='ur3032446'):
-    #Create Colaborative filtering model
-    recommender = Colaborative_Filtering(Y_data)
-    recommender.create_matrix()
-    recommender.create_model(k=4)
-    user_id=uid
-
-    # Check if there are any rows with the specified user_id
-    matching_rows = df[df.user_id == user_id]
-
-    if not matching_rows.empty:
-        # If there are matching rows, retrieve the user_id_number
-        user_id_number =matching_rows.values[0][3]
-        movies_rated=recommender.get_rated_movies(user_id_number)
-        pred_rating = recommender.calculate_score(user_id_number)
-    else:
-        print(f"No rows found for user_id: {user_id}")
-
-    #Convert movie_id_number to movie_title
-    movie_id_convert =df[['movie_id','movie_id_number']]
-    movie_id_convert= movie_id_convert.drop_duplicates()
-    movie_title = movies_df[['movie_id','title']]
-    movie_title_convert = pd.merge(movie_id_convert,movie_title)
-
-    #get recommendation
-    pred_rating.sort_values(inplace=True,ascending=False)
-    pred_rating_df = pd.DataFrame(pred_rating).reset_index()
-    pred_rating_df.columns = ['movie_id_number', 'predicted_rating']
-    final_pred_df = pd.merge(pred_rating_df,movie_id_convert)
-    final_pred_df = pd.merge(final_pred_df,movies_df)
-    final_pred_df = final_pred_df[['movie_id','title','predicted_rating']]
-    # Convert ndarray to list before calling jsonify
-    recommended_movies = final_pred_df['title'].head(10).values.tolist()
-
-    return recommended_movies
+def item_based_recommender(user_id, num_recommendations=10):
+    try:
+        rating_df_copy['user_id_number'] = rating_df_copy['user_id'].astype('category').cat.codes.values
+        rating_df_copy['movie_id_number'] = rating_df_copy['movie_id'].astype('category').cat.codes.values
+        
+        number_to_user_id = dict(enumerate(rating_df_copy['user_id'].astype('category').cat.categories))
+        user_id_to_number = {v: k for k, v in number_to_user_id.items()}
+        number_to_movie_id = dict(enumerate(rating_df_copy['movie_id'].astype('category').cat.categories))
+        
+        user_number = user_id_to_number[user_id]
+        
+        cf_model = load_model("../../checkpoints/rismf_nf300_lr0.006.pkl")
+        recommended_items = cf_model.recommend(user_number)
+        top_recommendations = recommended_items[:num_recommendations]
+        
+        recommended_movies = []
+        for movie_number in top_recommendations:
+            movie_id = number_to_movie_id[movie_number]
+            movie_title = movies_df[movies_df.movie_id == movie_id].title.values[0]
+            recommended_movies.append(movie_title)
+            
+        return recommended_movies
+        
+    except Exception as e:
+        print(f"Error in recommendation: {str(e)}")
+        return []

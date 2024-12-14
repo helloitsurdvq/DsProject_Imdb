@@ -48,3 +48,90 @@ a {
 a:hover {
     color: #0056b3; /* Darker blue on hover */
 }
+
+.recommendation-welcome {
+    min-height: 90vh;
+    height: 100%;
+    width: 100%;
+    padding: 2rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    color: white;
+    overflow: hidden;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.welcome-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+.welcome-content h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(to right, #f5c518, #ff9b39);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.welcome-content p {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 3rem;
+}
+
+.recommendation-options {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.option-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 300px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.option-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(245, 197, 24, 0.1);
+}
+
+.option-card i {
+    font-size: 3rem;
+    color: #f5c518;
+    margin-bottom: 1rem;
+}
+
+.option-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.option-card p {
+    font-size: 1rem;
+    color: #bbb;
+    margin-bottom: 1.5rem;
+}
+
+.option-button {
+    background: #f5c518;
+    color: #000;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.option-button:hover {
+    background: #ffd700;
+}

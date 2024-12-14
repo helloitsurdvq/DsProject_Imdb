@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import "./CollaborativeRecommendationPage.css";
 
 const CollaborativeRecommendationPage = () => {
-  const [userId, setUserId] = useState(""); // Added userId state
+  const [userId, setUserId] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,6 +42,7 @@ const CollaborativeRecommendationPage = () => {
 
         const movieDetails = tmdbResponse.data.results[0];
         return {
+          id: movieDetails.id,
           original_title: movieDetails.original_title,
           releaseDate: movieDetails.release_date,
           overview: movieDetails.overview,
@@ -82,22 +84,29 @@ const CollaborativeRecommendationPage = () => {
             .filter((movie) => movie !== null)
             .map((movie, index) => (
               <div key={index} className="movie-container">
-                <div>
-                  <img
-                    src={`https://image.tmdb.org/t/p/original${
-                      movie ? movie.posterPath : ""
-                    }`}
-                    alt={movie ? movie.original_title : ""}
-                  />
-                  <div className="movie-details">
-                    <h3>{movie ? movie.original_title : ""}</h3>
-                    <p>Release Date: {movie ? movie.releaseDate : ""}</p>
-                    <p>{movie ? movie.overview.slice(0, 118) + "..." : ""}</p>
+                <Link 
+                  to={`/movie/${movie.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  <div className="movie-poster">
+                    <img
+                      src={`https://image.tmdb.org/t/p/original${
+                        movie ? movie.posterPath : ""
+                      }`}
+                      alt={movie ? movie.original_title : ""}
+                    />
+                    <div className="movie-details">
+                      <h3>{movie ? movie.original_title : ""}</h3>
+                      <p>Release Date: {movie ? movie.releaseDate : ""}</p>
+                      <p>{movie ? movie.overview.slice(0, 118) + "..." : ""}</p>
+                    </div>
                   </div>
-                </div>
-                <div>
+                </Link>
+                <div className="movie-actions">
                   <a
-				    rel="noreferrer"
+                    rel="noreferrer"
                     href={`https://www.imdb.com/search/title/?title=${encodeURIComponent(
                       movie ? movie.original_title : ""
                     )}`}
