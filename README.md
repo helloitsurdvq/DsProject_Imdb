@@ -2,7 +2,7 @@
 **Introduction to Data Science Capstone Project - Group 08**
 ---
 ## Overview
-Movie is a popular form of entertainment and with countless options available of options available on platforms like IMDb, helping users discover films that match their taste has become increasingly valuable. This project focuses on developing a personalized movie recommender system using the movies dataset collected from the IMDb platform.
+Movie is a popular form of entertainment and with countless options available on platforms like IMDb, helping users discover films that match their taste has become increasingly valuable. This project focuses on developing a personalized movie recommender system using the movies dataset collected from the IMDb platform.
 
 ## Project Organization
 
