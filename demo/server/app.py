@@ -36,8 +36,8 @@ def collaborative_filteringl_recommend_movies():
 
         # Get recommended movies as a list of titles
         recommended_movies = item_based_recommender(userId)
-
-        return jsonify({"recommendations": recommended_movies})
+        history = get_user_history_ratings(userId)
+        return jsonify({"recommendations": recommended_movies, "history": history})
 
     except Exception as e:
         print(e)

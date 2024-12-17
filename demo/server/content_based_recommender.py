@@ -1,11 +1,15 @@
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
+from sklearn.metrics.pairwise import linear_kernel, cosine_similarity, cosine_distances
 from fuzzywuzzy import fuzz
 
 movies_df = pd.read_csv('../../data/cleaned/cleaned_movies_details.csv', usecols=['title','genres', 'overview', 'year', 'img_url', 'director', 'stars', 'movie_id'])
 sim_matrix = np.load('../../checkpoints/sim_matrix.npy')
+embeddings = np.load('../../checkpoints/embeddings.npz')['embeds']
+
+cosine_dist_matrix = cosine_distances(embeddings)
+movieid_to_index = {movie_id: idx for idx, movie_id in enumerate(movies_df['movie_id'])}
 
 # Function to find the closest title
 def matching_score(a, b):
@@ -24,20 +28,28 @@ def find_closest_title(title):
     distance_score = sorted_leven_scores[0][1]
     return closest_title, distance_score
 
-def contents_based_recommender(movie, num_of_recomm=10):
-    closest_title, similarity_score = find_closest_title(movie)    
-    suggestion = None
+def contents_based_recommender(movie, num_of_recomm=10, movieid_to_index=movieid_to_index, cosine_dist_matrix=cosine_dist_matrix):
+    closest_title, score = find_closest_title(movie)
+    name = closest_title if score != 100 else None
     
-    if similarity_score != 100:
-        suggestion = closest_title
-        
-    movie_index = get_index_from_title(closest_title)
-    movie_list = list(enumerate(sim_matrix[int(movie_index)]))
+    movie_id = movies_df[movies_df['title'] == closest_title]['movie_id'].values[0]
     
-    similar_movies = list(filter(lambda x: x[0] != int(movie_index), 
-                               sorted(movie_list, key=lambda x: x[1], reverse=True)))
+    if movie_id not in movieid_to_index:
+        raise ValueError('Movie ID does not exist.')
     
-    recommended_movies = [get_title_from_index(movie[0]) 
-                        for movie in similar_movies[:num_of_recomm]]
+    index = movieid_to_index[movie_id]
+    similarity_scores = 1 - cosine_dist_matrix[index]
+    similarity_scores[index] = -np.inf
     
-    return recommended_movies, suggestion
+    top_indices = np.argsort(similarity_scores)[-num_of_recomm:][::-1] 
+    
+    recommended_movies = []
+    for idx in top_indices:
+        movie = movies_df.iloc[idx]
+        movie_details = {
+            'title': movie['title']
+        }
+        recommended_movies.append(movie_details)
+    titles = [movie_details['title'] for movie_details in recommended_movies]
+            
+    return titles, name

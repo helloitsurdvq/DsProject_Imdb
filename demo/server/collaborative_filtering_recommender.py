@@ -105,6 +105,14 @@ class RISMF(object):
 def load_model(filename):
     with open(filename, 'rb') as f:
         return pickle.load(f)
+    
+def get_user_history_ratings(user_id):
+    user_ratings = rating_df_copy[rating_df_copy['user_id'] == user_id][['movie_id', 'rating']].head(10)
+    history = []
+    for _, row in user_ratings.iterrows():
+        movie_title = movies_df[movies_df.movie_id == row['movie_id']].title.values[0]
+        history.append([movie_title, row['rating']])
+    return history
 
 def item_based_recommender(user_id, num_recommendations=10):
     try:
@@ -132,3 +140,5 @@ def item_based_recommender(user_id, num_recommendations=10):
     except Exception as e:
         print(f"Error in recommendation: {str(e)}")
         return []
+    
+print(get_user_history_ratings('ur0547823'))
