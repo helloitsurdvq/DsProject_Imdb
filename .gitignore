@@ -133,5 +133,8 @@ dmypy.json
 
 */*/node_modules
 checkpoints/*.pkl
+checkpoints/*.npz
 checkpoints/*.npy
 notebooks/*.npy
+
+docs/*.pptx
