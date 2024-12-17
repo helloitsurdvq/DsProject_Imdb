@@ -5,7 +5,6 @@ from sklearn.metrics.pairwise import linear_kernel, cosine_similarity, cosine_di
 from fuzzywuzzy import fuzz
 
 movies_df = pd.read_csv('../../data/cleaned/cleaned_movies_details.csv', usecols=['title','genres', 'overview', 'year', 'img_url', 'director', 'stars', 'movie_id'])
-sim_matrix = np.load('../../checkpoints/sim_matrix.npy')
 embeddings = np.load('../../checkpoints/embeddings.npz')['embeds']
 
 cosine_dist_matrix = cosine_distances(embeddings)

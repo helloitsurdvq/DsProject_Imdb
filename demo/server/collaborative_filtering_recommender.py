@@ -9,7 +9,7 @@ import math
 
 rating_df = pd.read_csv('../../data/cleaned/cleaned_user_rating.csv')
 rating_df_copy = rating_df.copy()
-movies_df = pd.read_csv('../../data/cleaned/cleaned_movies_details.csv', usecols=['movie_id', 'title', 'genres', 'overview', 'director', 'stars', 'img_url'])
+movies_df = pd.read_csv('../../data/cleaned/cleaned_movies_details.csv', usecols=['movie_id', 'title', 'img_url'])
 
 # Only keep users with >= 5 ratings
 user_rating_counts = rating_df_copy['user_id'].value_counts()
@@ -30,7 +30,6 @@ movie_id_to_number = {v: k for k, v in number_to_movie_id.items()}
 # We may store an array for user_id <=> user_id_number and other types
 def get_movieURL(movie_id):
     return movies_df[movies_df.movie_id == movie_id].img_url.values[0]
-
     
 def get_user_history_ratings(user_id):
     user_ratings = rating_df_copy[rating_df_copy['user_id'] == user_id][['movie_id', 'rating']].head(10)
@@ -109,7 +108,7 @@ class CF(object):
 
 def cf_recommender(user_id, num_recommendations=10):
     cf_model = CF(all_data, n_neighbor=5, type=1)
-    cf_model.load_model('../../checkpoints/user_user_model.npz')
+    cf_model.fit()
     
     if user_id not in user_id_to_number:
         return []  
