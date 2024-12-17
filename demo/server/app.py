@@ -35,7 +35,7 @@ def collaborative_filteringl_recommend_movies():
         userId = data.get("userId")
 
         # Get recommended movies as a list of titles
-        recommended_movies = item_based_recommender(userId)
+        recommended_movies = cf_recommender(userId)
         history = get_user_history_ratings(userId)
         return jsonify({"recommendations": recommended_movies, "history": history})
 
