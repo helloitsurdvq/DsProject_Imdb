@@ -138,3 +138,4 @@ checkpoints/*.npy
 notebooks/*.npy
 
 docs/*.pptx
+docs/*.pdf
